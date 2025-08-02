@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CureBot - Smart Healthcare Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            min-width: 400px;
+            max-width: 800px;
+            width: 90%;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            font-size: 3rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .option-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .option-card {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-card:hover, .option-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-5px);
+        }
+
+        .medication-list {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .medication-item {
+            background: white;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .reminder-card {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .progress-bar {
+            background: #e1e5e9;
+            height: 6px;
+            border-radius: 3px;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .symptom-chart {
+            display: flex;
+            justify-content: space-around;
+            align-items: end;
+            height: 200px;
+            margin: 20px 0;
+        }
+
+        .chart-bar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            width: 40px;
+            border-radius: 5px 5px 0 0;
+            margin: 0 5px;
+            position: relative;
+        }
+
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #666;
+        }
+
+        .patient-summary {
+            background: linear-gradient(135deg, #17a2b8, #6f42c1);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .alert.danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            .logo h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Step 1: Welcome -->
+        <div class="step active" id="step1">
+            <div class="logo">
+                <h1>🏥 CureBot</h1>
+                <p>Smart Drug Interaction Analysis & Healthcare Assistant</p>
+            </div>
+            <div class="form-group">
+                <label>Select Your Preferred Language:</label>
+                <select id="language">
+                    <option value="english">English</option>
+                    <option value="spanish">Español</option>
+                    <option value="french">Français</option>
+                    <option value="german">Deutsch</option>
+                    <option value="hindi">हिंदी</option>
+                    <option value="chinese">中文</option>
+                </select>
+            </div>
+            <button class="btn" onclick="nextStep(2)">Continue</button>
+        </div>
+
+        <!-- Step 2: Communication Preference -->
+        <div class="step" id="step2">
+            <h2>Communication Preference</h2>
+            <p>How would you prefer to communicate with CureBot?</p>
+            <div class="option-cards">
+                <div class="option-card" onclick="selectOption(this, 'audio')">
+                    <h3>🎤 Audio</h3>
+                    <p>Voice communication</p>
+                </div>
+                <div class="option-card" onclick="selectOption(this, 'text')">
+                    <h3>💬 Text</h3>
+                    <p>Text-based chat</p>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="prevStep(1)">Back</button>
+            <button class="btn" onclick="nextStep(3)">Continue</button>
+        </div>
+
+        <!-- Step 3: User Type -->
+        <div class="step" id="step3">
+            <h2>User Type</h2>
+            <p>Are you a patient or a family member?</p>
+            <div class="option-cards">
+                <div class="option-card" onclick="selectUserType('patient')">
+                    <h3>👤 Patient</h3>
+                    <p>I am the patient</p>
+                </div>
+                <div class="option-card" onclick="selectUserType('family')">
+                    <h3>👨‍👩‍👧‍👦 Family Member</h3>
+                    <p>I am a family member</p>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="prevStep(2)">Back</button>
+        </div>
+
+        <!-- Step 4: Family Member Details -->
+        <div class="step" id="step4">
+            <h2>Family Member Information</h2>
+            <div class="form-group">
+                <label>Your Name:</label>
+                <input type="text" id="familyName" placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="tel" id="familyPhone" placeholder="Enter your phone number">
+            </div>
+            <div class="form-group">
+                <label>Relationship to Patient:</label>
+                <select id="relationship">
+                    <option value="">Select relationship</option>
+                    <option value="spouse">Spouse</option>
+                    <option value="parent">Parent</option>
+                    <option value="child">Child</option>
+                    <option value="sibling">Sibling</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Patient Access Code:</label>
+                <input type="password" id="accessCode" placeholder="Enter patient access code">
+            </div>
+            <button class="btn btn-secondary" onclick="prevStep(3)">Back</button>
+            <button class="btn" onclick="accessPatientData()">Access Patient Data</button>
+        </div>
+
+        <!-- Step 5: Patient Registration -->
+        <div class="step" id="step5">
+            <h2>Patient Registration</h2>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label>Full Name:</label>
+                    <input type="text" id="patientName" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Age:</label>
+                    <input type="number" id="patientAge" placeholder="Enter your age">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Phone Number:</label>
+                <input type="tel" id="patientPhone" placeholder="Enter your phone number">
+            </div>
+            <div class="form-group">
+                <label>Current Health Conditions:</label>
+                <textarea id="healthConditions" rows="3" placeholder="Describe any current health conditions"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Previous Medical Conditions:</label>
+                <textarea id="previousConditions" rows="3" placeholder="Describe any previous medical conditions"></textarea>
+            </div>
+            <button class="btn btn-secondary" onclick="prevStep(3)">Back</button>
+            <button class="btn" onclick="nextStep(6)">Continue</button>
+        </div>
+
+        <!-- Step 6: Allergies and Current Medications -->
+        <div class="step" id="step6">
+            <h2>Allergies & Current Medications</h2>
+            <div class="form-group">
+                <label>Do you have any allergies?</label>
+                <div class="option-cards">
+                    <div class="option-card" onclick="selectOption(this, 'yes', 'allergies')">
+                        <h3>Yes</h3>
+                    </div>
+                    <div class="option-card" onclick="selectOption(this, 'no', 'allergies')">
+                        <h3>No</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group" id="allergyDetails" style="display: none;">
+                <label>Please list your allergies:</label>
+                <textarea id="allergyList" rows="3" placeholder="List all known allergies"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Are you currently taking any medications?</label>
+                <div class="option-cards">
+                    <div class="option-card" onclick="selectOption(this, 'yes', 'medications')">
+                        <h3>Yes</h3>
+                    </div>
+                    <div class="option-card" onclick="selectOption(this, 'no', 'medications')">
+                        <h3>No</h3>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-secondary" onclick="prevStep(5)">Back</button>
+            <button class="btn" onclick="nextStep(7)">Continue</button>
+        </div>
+
+        <!-- Step 7: Medication Details -->
+        <div class="step" id="step7">
+            <h2>Current Medications</h2>
+            <div class="medication-list" id="medicationList">
+                <div class="form-group">
+                    <label>Medication Name:</label>
+                    <input type="text" id="medName" placeholder="Enter medication name">
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Dosage:</label>
+                        <input type="text" id="medDosage" placeholder="e.g., 10mg">
+                    </div>
+                    <div class="form-group">
+                        <label>Frequency:</label>
+                        <select id="medFrequency">
+                            <option value="">Select frequency</option>
+                            <option value="once">Once daily</option>
+                            <option value="twice">Twice daily</option>
+                            <option value="thrice">Three times daily</option>
+                            <option value="asneeded">As needed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Time of Administration:</label>
+                        <input type="time" id="medTime">
+                    </div>
+                    <div class="form-group">
+                        <label>With/Without Food:</label>
+                        <select id="medFood">
+                            <option value="">Select option</option>
+                            <option value="with">With food</option>
+                            <option value="without">Without food</option>
+                            <option value="either">Either</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button class="btn" onclick="addMedication()">Add Medication</button>
+            <div id="addedMedications"></div>
+            <button class="btn btn-secondary" onclick="prevStep(6)">Back</button>
+            <button class="btn" onclick="nextStep(8)">Continue to Dashboard</button>
+        </div>
+
+        <!-- Step 8: Patient Dashboard -->
+        <div class="step" id="step8">
+            <h2>Patient Dashboard</h2>
+            
+            <div class="patient-summary">
+                <h3>Patient Summary</h3>
+                <p id="patientSummary">Loading patient information...</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="chart-container">
+                    <h3>Symptom Severity Tracking</h3>
+                    <div class="symptom-chart">
+                        <div class="chart-bar" style="height: 60px;">
+                            <div class="chart-label">Pain</div>
+                        </div>
+                        <div class="chart-bar" style="height: 80px;">
+                            <div class="chart-label">Fatigue</div>
+                        </div>
+                        <div class="chart-bar" style="height: 40px;">
+                            <div class="chart-label">Nausea</div>
+                        </div>
+                        <div class="chart-bar" style="height: 90px;">
+                            <div class="chart-label">Anxiety</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Medical Report Status</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 75%;"></div>
+                    </div>
+                    <p>Reports Completed: 75%</p>
+                    <ul>
+                        <li>✅ Blood Test</li>
+                        <li>✅ X-Ray</li>
+                        <li>⏳ MRI Scan</li>
+                        <li>❌ CT Scan</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert">
+                <strong>⚠️ Drug Interaction Alert:</strong> Potential interaction detected between Medication A and Medication B. Please consult your healthcare provider.
+            </div>
+
+            <h3>Medication Reminders</h3>
+            <div id="medicationReminders">
+                <!-- Reminders will be populated here -->
+            </div>
+
+            <button class="btn" onclick="setReminder()">Set New Reminder</button>
+            <button class="btn" onclick="analyzeInteractions()">Analyze Drug Interactions</button>
+        </div>
+
+        <!-- Step 9: Family Dashboard -->
+        <div class="step" id="step9">
+            <h2>Patient Overview - Family Access</h2>
+            
+            <div class="patient-summary">
+                <h3>Patient: John Doe</h3>
+                <p>Age: 45 | Last Updated: Today, 2:30 PM</p>
+            </div>
+
+            <div class="grid-2">
+                <div class="chart-container">
+                    <h3>Current Symptoms</h3>
+                    <div class="symptom-chart">
+                        <div class="chart-bar" style="height: 70px;">
+                            <div class="chart-label">Pain</div>
+                        </div>
+                        <div class="chart-bar" style="height: 50px;">
+                            <div class="chart-label">Sleep</div>
+                        </div>
+                        <div class="chart-bar" style="height: 90px;">
+                            <div class="chart-label">Mobility</div>
+                        </div>
+                        <div class="chart-bar" style="height: 30px;">
+                            <div class="chart-label">Appetite</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <h3>Medication Compliance</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 85%;"></div>
+                    </div>
+                    <p>Compliance Rate: 85%</p>
+                </div>
+            </div>
+
+            <div class="alert danger">
+                <strong>🚨 Urgent:</strong> Patient missed two medication doses. Last taken: Yesterday 8:00 PM
+            </div>
+
+            <h3>Recent Medical Reports</h3>
+            <div class="medication-item">
+                <div>
+                    <strong>Blood Pressure Check</strong>
+                    <p>140/90 mmHg - Slightly elevated</p>
+                </div>
+                <span>2 hours ago</span>
+            </div>
+            <div class="medication-item">
+                <div>
+                    <strong>Blood Sugar Test</strong>
+                    <p>120 mg/dL - Normal range</p>
+                </div>
+                <span>1 day ago</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let userData = {};
+        let medications = [];
+
+        function nextStep(step) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep = step;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+        }
+
+        function prevStep(step) {
+            document.getElementById(`step${currentStep}`).classList.remove('active');
+            currentStep = step;
+            document.getElementById(`step${currentStep}`).classList.add('active');
+        }
+
+        function selectOption(element, value, type = null) {
+            // Remove selected class from siblings
+            const siblings = element.parentNode.children;
+            for (let sibling of siblings) {
+                sibling.classList.remove('selected');
+            }
+            element.classList.add('selected');
+            
+            if (type === 'allergies' && value === 'yes') {
+                document.getElementById('allergyDetails').style.display = 'block';
+            } else if (type === 'allergies' && value === 'no') {
+                document.getElementById('allergyDetails').style.display = 'none';
+            }
+            
+            userData[type || 'lastSelection'] = value;
+        }
+
+        function selectUserType(type) {
+            userData.userType = type;
+            if (type === 'patient') {
+                nextStep(5);
+            } else {
+                nextStep(4);
+            }
+        }
+
+        function accessPatientData() {
+            const familyName = document.getElementById('familyName').value;
+            const accessCode = document.getElementById('accessCode').value;
+            
+            if (familyName && accessCode) {
+                // Simulate access verification
+                userData.familyName = familyName;
+                nextStep(9);
+            } else {
+                alert('Please fill in all required fields.');
+            }
+        }
+
+        function addMedication() {
+            const name = document.getElementById('medName').value;
+            const dosage = document.getElementById('medDosage').value;
+            const frequency = document.getElementById('medFrequency').value;
+            const time = document.getElementById('medTime').value;
+            const food = document.getElementById('medFood').value;
+
+            if (name && dosage && frequency) {
+                const medication = { name, dosage, frequency, time, food };
+                medications.push(medication);
+                
+                const medicationDiv = document.createElement('div');
+                medicationDiv.className = 'medication-item';
+                medicationDiv.innerHTML = `
+                    <div>
+                        <strong>${name} - ${dosage}</strong>
+                        <p>${frequency} ${time ? 'at ' + time : ''} ${food ? '(' + food + ' food)' : ''}</p>
+                    </div>
+                    <button onclick="removeMedication(${medications.length - 1})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px;">Remove</button>
+                `;
+                
+                document.getElementById('addedMedications').appendChild(medicationDiv);
+                
+                // Clear form
+                document.getElementById('medName').value = '';
+                document.getElementById('medDosage').value = '';
+                document.getElementById('medFrequency').value = '';
+                document.getElementById('medTime').value = '';
+                document.getElementById('medFood').value = '';
+            } else {
+                alert('Please fill in medication name, dosage, and frequency.');
+            }
+        }
+
+        function removeMedication(index) {
+            medications.splice(index, 1);
+            updateMedicationDisplay();
+        }
+
+        function updateMedicationDisplay() {
+            const container = document.getElementById('addedMedications');
+            container.innerHTML = '';
+            medications.forEach((med, index) => {
+                const medicationDiv = document.createElement('div');
+                medicationDiv.className = 'medication-item';
+                medicationDiv.innerHTML = `
+                    <div>
+                        <strong>${med.name} - ${med.dosage}</strong>
+                        <p>${med.frequency} ${med.time ? 'at ' + med.time : ''} ${med.food ? '(' + med.food + ' food)' : ''}</p>
+                    </div>
+                    <button onclick="removeMedication(${index})" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px;">Remove</button>
+                `;
+                container.appendChild(medicationDiv);
+            });
+        }
+
+        function setReminder() {
+            // Create medication reminders
+            const reminderContainer = document.getElementById('medicationReminders');
+            reminderContainer.innerHTML = '';
+            
+            medications.forEach(med => {
+                const reminderDiv = document.createElement('div');
+                reminderDiv.className = 'reminder-card';
+                reminderDiv.innerHTML = `
+                    <h4>💊 ${med.name}</h4>
+                    <p>Take ${med.dosage} - ${med.frequency}</p>
+                    <p>⏰ Next dose: ${med.time || 'As scheduled'}</p>
+                    <button class="btn" style="background: rgba(255,255,255,0.2);" onclick="markAsTaken('${med.name}')">Mark as Taken</button>
+                `;
+                reminderContainer.appendChild(reminderDiv);
+            });
+        }
+
+        function markAsTaken(medName) {
+            alert(`✅ ${medName} marked as taken!`);
+        }
+
+        function analyzeInteractions() {
+            if (medications.length < 2) {
+                alert('Add at least 2 medications to analyze interactions.');
+                return;
+            }
+            
+            // Simulate interaction analysis
+            const interactions = [
+                "No significant interactions detected between current medications.",
+                "Mild interaction detected: Monitor for increased drowsiness.",
+                "⚠️ Moderate interaction: Avoid taking medications within 2 hours of each other.",
+                "🚨 Severe interaction: Consult healthcare provider immediately."
+            ];
+            
+            const randomInteraction = interactions[Math.floor(Math.random() * interactions.length)];
+            
+            const alertDiv = document.createElement('div');
+            alertDiv.className = randomInteraction.includes('🚨') ? 'alert danger' : 'alert';
+            alertDiv.innerHTML = `<strong>Drug Interaction Analysis:</strong> ${randomInteraction}`;
+            
+            // Insert after the existing alert
+            const dashboard = document.getElementById('step8');
+            const existingAlert = dashboard.querySelector('.alert');
+            existingAlert.parentNode.insertBefore(alertDiv, existingAlert.nextSibling);
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update patient summary when reaching dashboard
+            const patientSummary = document.getElementById('patientSummary');
+            if (patientSummary) {
+                setTimeout(() => {
+                    const name = document.getElementById('patientName')?.value || 'Patient';
+                    const age = document.getElementById('patientAge')?.value || 'N/A';
+                    patientSummary.innerHTML = `
+                        <strong>Name:</strong> ${name}<br>
+                        <strong>Age:</strong> ${age}<br>
+                        <strong>Medications:</strong> ${medications.length} active prescriptions<br>
+                        <strong>Last Updated:</strong> ${new Date().toLocaleString()}
+                    `;
+                }, 100);
+            }
+        });
+
+        // Auto-populate reminders when dashboard loads
+        setInterval(() => {
+            if (currentStep === 8 && medications.length > 0) {
+                setReminder();
+            }
+        }, 30000); // Update every 30 seconds
+    </script>
+</body>
+</html>
